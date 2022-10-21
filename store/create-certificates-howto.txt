@@ -1,0 +1,33 @@
+1) Create CA Certificate (use "changeit" as passphrase)
+openssl req -x509 -sha256 -days 3650 -newkey rsa:4096 -keyout rootCA.key -out rootCA.crt
+
+2) Create Certificate Signing Request
+openssl req -new -newkey rsa:4096 -keyout localhost.key -out localhost.csr
+
+3) Sign the Request
+openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in localhost.csr -out localhost.crt -days 3650 -CAcreateserial -extfile localhost.ext
+
+4) Print Cert details
+openssl x509 -in localhost.crt -text
+
+5) Export Cert to standard P12 format
+openssl pkcs12 -export -out localhost.p12 -name "localhost" -inkey localhost.key -in localhost.crt
+
+6) Create local keystore and import certificate
+keytool -importkeystore -srckeystore localhost.p12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype JKS
+
+7) For mutual authentication: create truststore
+keytool -import -trustcacerts -noprompt -alias ca -ext san=dns:localhost,ip:127.0.0.1 -file rootCA.crt -keystore truststore.jks
+
+8) Create a client-side certificate for a specific user (e.g. use CN=Bob -- it has to coincide to username allowed in application)
+openssl req -new -newkey rsa:4096 -nodes -keyout clientBob.key -out clientBob.csr
+
+9) Sign this request with our CA
+openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in clientBob.csr -out clientBob.crt -days 3650 -CAcreateserial
+
+10) Import signed certificate and private key into P12 file
+openssl pkcs12 -export -out clientBob.p12 -name "clientBob" -inkey clientBob.key -in clientBob.crt
+
+11) Install client certificate in client Browser
+
+

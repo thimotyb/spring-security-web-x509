@@ -4,7 +4,8 @@ openssl req -x509 -sha256 -days 3650 -newkey rsa:4096 -keyout rootCA.key -out ro
 2) Create Certificate Signing Request
 openssl req -new -newkey rsa:4096 -keyout localhost.key -out localhost.csr
 
-3) Sign the Request
+3) Sign the Request z
+touch localhost.ext
 openssl x509 -req -CA rootCA.crt -CAkey rootCA.key -in localhost.csr -out localhost.crt -days 3650 -CAcreateserial -extfile localhost.ext
 
 4) Print Cert details
